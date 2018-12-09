@@ -20,7 +20,7 @@ def get_image(path, w, h):
     return img
 
 def view_canvas(canvas, h, w, numframes, filename=None):
-    img = make_image_grid(w, h) if filename is None else img = get_image(filename, w, h)
+    img = make_image_grid(w, h) if filename is None else get_image(filename, w, h)
     showarray(img/255.)
     for i in range(numframes):
         img = modify_canvas(img, canvas)

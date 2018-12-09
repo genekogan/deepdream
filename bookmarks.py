@@ -1,5 +1,5 @@
 from random import random
-from lapnorm import *
+#from lapnorm import *
 
 def get_list_favorites(layers):
     favorites = []

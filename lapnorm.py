@@ -15,7 +15,7 @@ import scipy.misc
 import cv2
 import tensorflow as tf
 from util import *
-from mask import get_mask_sizes, inject_image
+from mask import *
 from canvas import *
 #from mask import crop_image, get_mask_sizes, inject_image
 
