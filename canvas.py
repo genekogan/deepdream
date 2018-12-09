@@ -14,14 +14,19 @@ def showarray(a, fmt='jpeg'):
     PIL.Image.fromarray(a).save(f, fmt)
     display(Image(data=f.getvalue()))
 
-def view_canvas(canvas, h, w, numframes):
-    img = make_image_grid(w, h)
+def get_image(path, w, h):
+    img = scipy.misc.imread(path, mode='RGB')
+    img = scipy.misc.imresize(img, (h, w))
+    return img
+
+def view_canvas(canvas, h, w, numframes, filename=None):
+    img = make_image_grid(w, h) if filename is None else img = get_image(filename, w, h)
+    showarray(img/255.)
     for i in range(numframes):
         img = modify_canvas(img, canvas)
         showarray(img/255.)
-
-def make_image_grid(w, h):
-    spacing, thickness = 15, 3
+        
+def make_image_grid(w, h, spacing=15, thickness=3):
     img = np.zeros((h, w, 3))
     for off in range(thickness):
         img[:,range(off, w, spacing),0] = 255
@@ -30,14 +35,8 @@ def make_image_grid(w, h):
     img[range(8+int(h/2),-8+int(h/2),-1),range(-8+int(w/2),8+int(w/2)),:] = [0,255,0]
     return img
 
-def get_image(path, w, h):
-    img = scipy.misc.imread(path, mode='RGB')
-    img = scipy.misc.imresize(img, (h, w))
-    return img
 
-
-# should it be mod by h-1, w-1?
-def map_image(img, idx):
+def map_image(img, idx):  # should it be mod by h-1, w-1?
     h, w = img.shape[0:2]
     idx = np.array(idx).reshape((h*w, 2))
     idx_mod = np.mod(idx,[h,w])  
@@ -63,82 +62,90 @@ def map_image(img, idx):
     img_f = img_f.reshape((h, w, 3))
     return img_f
 
-def modify_canvas(img, mod):
-    shift, stretch = mod['shift'], mod['stretch']
-    zoom, expand = mod['zoom'], mod['expand']
-    rot_const, rot_ang, rot_dst = mod['rot_const'], mod['rot_ang'], mod['rot_dst']
-    spiral_margin, spiral_periods = mod['spiral_margin'], mod['spiral_periods']
-    noise_rate, noise_margin = mod['noise_rate'], mod['noise_margin']
+
+def modify_canvas(img, mods, masks=None):
     h, w = img.shape[0:2]
-    cy, cx = h * mod['center'][0], w * mod['center'][1]
+    mods = mods if isinstance(mods, list) else [mods]
+    masks = masks / np.sum(masks, axis=2)[:, :, np.newaxis] if masks is not None else np.ones((h, w, len(mods)))
+
+    # make default grid
+    grid = np.mgrid[0:w, 0:h].T
+    grid[:,:,0], grid[:,:,1] = grid[:,:,1], grid[:,:,0].copy()
+    mod_idxs = np.copy([[grid]*3]*len(mods))
     
-    # check in advance on what operations so as to save time
-    to_shift = (shift[0] != 0.0 or shift[1] != 0.0 or stretch[0] != 1.0 or stretch[1] != 1.0)
-    to_zoom = (zoom != 1.0 or expand != 0.0)
-    to_spiral = (spiral_margin > 0)
-    to_rotate = (rot_const != 0.0 or rot_ang != 0.0 or rot_dst != 0.0)
-    to_noise = (noise_margin[0] != 0.0 or noise_margin[0] != 0.0)
+    # calculate all th index transformations
+    for idxm, mod in enumerate(mods):
+        shift, stretch = mod['shift'], mod['stretch']
+        zoom, expand = mod['zoom'], mod['expand']
+        rot_const, rot_ang, rot_dst = mod['rot_const'], mod['rot_ang'], mod['rot_dst']
+        spiral_margin, spiral_periods = mod['spiral_margin'], mod['spiral_periods']
+        noise_rate, noise_margin = mod['noise_rate'], mod['noise_margin']
+        cy, cx = h * mod['center'][0], w * mod['center'][1]
 
-    # create initial grid for transformations
-    if to_shift or to_zoom or to_spiral or to_rotate:
-        grid = np.mgrid[0:w, 0:h].T
-        dfc = grid-[cx, cy]
-        
-    if to_zoom or to_spiral or to_rotate:
-        dfc2 = np.power(dfc, 2)
-        dst = np.power(np.sum(dfc2, axis=2), 0.5)
-        ang = np.arctan2(dfc[:,:,1], dfc[:,:,0])
-        dst2, ang2 = dst, ang
+        # check in advance on what operations so as to save time
+        to_shift = (shift[0] != 0.0 or shift[1] != 0.0 or stretch[0] != 1.0 or stretch[1] != 1.0)
+        to_zoom = (zoom != 1.0 or expand != 0.0)
+        to_spiral = (spiral_margin > 0)
+        to_rotate = (rot_const != 0.0 or rot_ang != 0.0 or rot_dst != 0.0)
+        to_noise = (noise_margin[0] != 0.0 or noise_margin[0] != 0.0)
 
-    # xy stretch/compress/shift
-    if to_shift:
-        stretch_mul = 1.0 / stretch[0], 1.0 / stretch[1]
-        sy = cy - h * shift[0] + dfc[:,:,1] * stretch_mul[0]
-        sx = cx - w * shift[1] + dfc[:,:,0] * stretch_mul[1]
-        idx2 = np.dstack([sy, sx])
-        img = map_image(img, idx2)
+        # create initial grid for transformations
+        if to_shift or to_zoom or to_spiral or to_rotate:
+            grid = np.mgrid[0:w, 0:h].T
+            dfc = grid-[cx, cy]
 
-    # expand/contract, plain zoom + radial
-    if to_zoom:
-        dst2 = np.add(np.multiply(1.0/zoom, dst), -expand).clip(min=0)
-    
-    # more complex dist multiply
-    if to_spiral:
-        dst2 = np.multiply(dst2, 1.0 + spiral_margin * np.sin(spiral_periods * ang))
+        # zooming, spirals/rotations
+        if to_zoom or to_spiral or to_rotate:
+            dfc2 = np.power(dfc, 2)
+            dst = np.power(np.sum(dfc2, axis=2), 0.5)
+            ang = np.arctan2(dfc[:,:,1], dfc[:,:,0])
+            dst2, ang2 = dst, ang
 
-    # rotation
-    if to_rotate:
-        ang2 = np.add(ang, rot_const + rot_ang * ang + rot_dst * dst)
-    
-    # re-map according to dst2 and ang2
-    if to_zoom or to_spiral or to_rotate:
-        idx_a = ang2[grid[:,:,1], grid[:,:,0]]
-        idx_d = dst2[grid[:,:,1], grid[:,:,0]]
-        idx_sin = cy + np.multiply(idx_d, np.sin(idx_a))
-        idx_cos = cx + np.multiply(idx_d, np.cos(idx_a))
-        idx2 = np.dstack((np.array(idx_sin), np.array(idx_cos)))
-        img = map_image(img, idx2)
+        # xy stretch/compress/shift
+        if to_shift:
+            stretch_mul = 1.0 / stretch[0], 1.0 / stretch[1]
+            sy = cy - h * shift[0] + dfc[:,:,1] * stretch_mul[0]
+            sx = cx - w * shift[1] + dfc[:,:,0] * stretch_mul[1]
+            idx2 = np.dstack([sy, sx])
+            mod_idxs[idxm][0] = idx2
 
-    # perlin noise, very inefficient because of the double for loop
-    if to_noise:
-        offyy, offyx, offxy, offxx = 400, 200, 300, 100
-        nyy, nyx, nxy, nxx = noise_rate[1], noise_rate[1], noise_rate[0], noise_rate[0]
-        midy, marginy = 0.5*(-noise_margin[0]+noise_margin[0]), 0.5*(noise_margin[0]--noise_margin[0])
-        midx, marginx = 0.5*(-noise_margin[1]+noise_margin[1]), 0.5*(noise_margin[1]--noise_margin[1])
-        idx2 = [[(y+midy+marginy*snoise2(offyy+nyy*y/h, offyx+nyx*x/w, 3), 
-                  x+midx+marginx*snoise2(offxy+nxy*y/h, offxx+nxx*x/w, 3)) 
-                for x in range(w)] for y in range(h)]
+        # expand/contract, plain zoom + radial
+        if to_zoom:
+            dst2 = np.add(np.multiply(1.0/zoom, dst), -expand).clip(min=0)
+
+        # more complex dist multiply
+        if to_spiral:
+            dst2 = np.multiply(dst2, 1.0 + spiral_margin * np.sin(spiral_periods * ang))
+
+        # rotation
+        if to_rotate:
+            ang2 = np.add(ang, rot_const + rot_ang * ang + rot_dst * dst)
+
+        # re-map according to dst2 and ang2
+        if to_zoom or to_spiral or to_rotate:
+            idx_a = ang2[grid[:,:,1], grid[:,:,0]]
+            idx_d = dst2[grid[:,:,1], grid[:,:,0]]
+            idx_sin = cy + np.multiply(idx_d, np.sin(idx_a))
+            idx_cos = cx + np.multiply(idx_d, np.cos(idx_a))
+            idx2 = np.dstack((np.array(idx_sin), np.array(idx_cos)))
+            mod_idxs[idxm][1] = idx2
+
+        # perlin noise, very inefficient because of the double for loop
+        if to_noise:
+            offyy, offyx, offxy, offxx = 400, 200, 300, 100
+            nyy, nyx, nxy, nxx = noise_rate[1], noise_rate[1], noise_rate[0], noise_rate[0]
+            midy, marginy = 0.5*(-noise_margin[0]+noise_margin[0]), 0.5*(noise_margin[0]--noise_margin[0])
+            midx, marginx = 0.5*(-noise_margin[1]+noise_margin[1]), 0.5*(noise_margin[1]--noise_margin[1])
+            idx2 = [[(y+midy+marginy*snoise2(offyy+nyy*y/h, offyx+nyx*x/w, 3), 
+                      x+midx+marginx*snoise2(offxy+nxy*y/h, offxx+nxx*x/w, 3)) 
+                    for x in range(w)] for y in range(h)]
+            mod_idxs[idxm][2] = idx2
+
+    # average shift-indexes and transform the image
+    for i in range(len(mod_idxs[0])):
+        idxs = [np.multiply(mod_idxs[m][i], np.expand_dims(masks[:,:,m], 2)) for m in range(len(mods))]
+        idx2 = np.sum(idxs, axis=0)
         img = map_image(img, idx2)
 
     return img
 
-
-def view_canvas2(canvas, h, w, numframes):
-    img = make_image_grid(w, h)
-    #img = get_image("media/yann-lecun.png", w, h)
-    #img = get_image("media/concentric-circles.jpg", w, h)
-    showarray(img/255.)
-    for i in range(numframes):
-        img = modify_canvas(img, canvas)
-        showarray(img/255.)
-        
