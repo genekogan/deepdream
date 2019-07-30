@@ -27,6 +27,7 @@ def get_random(whichlayer, n):
     channels = [{"layer":whichlayer, "channel":c} for c in idx_channels]
     return channels
 
+
 layer_lookup={'A1':'conv2d0_pre_relu', 'A2':'conv2d1_pre_relu', 'A3':'conv2d2_pre_relu', 'B1':'mixed3a_1x1_pre_relu', 'B2':'mixed3a_3x3_bottleneck_pre_relu', 'B3':'mixed3a_3x3_pre_relu', 'B4':'mixed3a_5x5_bottleneck_pre_relu', 'B5':'mixed3a_5x5_pre_relu', 'B6':'mixed3a_pool_reduce_pre_relu', 'C1':'mixed3b_1x1_pre_relu', 'C2':'mixed3b_3x3_bottleneck_pre_relu', 'C3':'mixed3b_3x3_pre_relu', 'C4':'mixed3b_5x5_bottleneck_pre_relu', 'C5':'mixed3b_5x5_pre_relu', 'C6':'mixed3b_pool_reduce_pre_relu', 'D1':'mixed4a_1x1_pre_relu', 'D2':'mixed4a_3x3_bottleneck_pre_relu', 'D3':'mixed4a_3x3_pre_relu', 'D4':'mixed4a_5x5_bottleneck_pre_relu', 'D5':'mixed4a_5x5_pre_relu', 'D6':'mixed4a_pool_reduce_pre_relu', 'E1':'mixed4b_1x1_pre_relu', 'E2':'mixed4b_3x3_bottleneck_pre_relu', 'E3':'mixed4b_3x3_pre_relu', 'E4':'mixed4b_5x5_bottleneck_pre_relu', 'E5':'mixed4b_5x5_pre_relu', 'E6':'mixed4b_pool_reduce_pre_relu', 'F1':'mixed4c_1x1_pre_relu', 'F2':'mixed4c_3x3_bottleneck_pre_relu', 'F3':'mixed4c_3x3_pre_relu', 'F4':'mixed4c_5x5_bottleneck_pre_relu', 'F5':'mixed4c_5x5_pre_relu', 'F6':'mixed4c_pool_reduce_pre_relu', 'G1':'mixed4d_1x1_pre_relu', 'G2':'mixed4d_3x3_bottleneck_pre_relu', 'G3':'mixed4d_3x3_pre_relu', 'G4':'mixed4d_5x5_bottleneck_pre_relu', 'G5':'mixed4d_5x5_pre_relu', 'G6':'mixed4d_pool_reduce_pre_relu', 'H1':'mixed4e_1x1_pre_relu', 'H2':'mixed4e_3x3_bottleneck_pre_relu', 'H3':'mixed4e_3x3_pre_relu', 'H4':'mixed4e_5x5_bottleneck_pre_relu', 'H5':'mixed4e_5x5_pre_relu', 'H6':'mixed4e_pool_reduce_pre_relu', 'J1':'mixed5a_1x1_pre_relu', 'J2':'mixed5a_3x3_bottleneck_pre_relu', 'J3':'mixed5a_3x3_pre_relu', 'J4':'mixed5a_5x5_bottleneck_pre_relu', 'J5':'mixed5a_5x5_pre_relu', 'J6':'mixed5a_pool_reduce_pre_relu', 'K1':'mixed5b_1x1_pre_relu', 'K2':'mixed5b_3x3_bottleneck_pre_relu', 'K3':'mixed5b_3x3_pre_relu', 'K4':'mixed5b_5x5_bottleneck_pre_relu', 'K5':'mixed5b_5x5_pre_relu', 'K6':'mixed5b_pool_reduce_pre_relu', 'L1':'head0_bottleneck_pre_relu', 'L2':'head1_bottleneck_pre_relu'}
 
 layers_c1 = [   
@@ -166,6 +167,7 @@ faves_h1 = [
     {"layer":"L1", "channels":[9,18,20,28,35,41,46,55,86,97,103,108,124]}
 ]
 
+
 birds=[{"layer":"F6","channels":[34]},{"layer":"G6","channels":[2,11,15]},{"layer":"H1","channels":[250]},{"layer":"H6","channels":[75,93]},{"layer":"J3","channels":[50]},{"layer":"J6","channels":[16]},{"layer":"L1","channels":[10]}]
 
 bowl=[{"layer":"D1","channels":[96]},{"layer":"E1","channels":[62]},{"layer":"E2","channels":[78]},{"layer":"E3","channels":[150]},{"layer":"F2","channels":[32]},{"layer":"G2","channels":[38]},{"layer":"G3","channels":[185]},{"layer":"G6","channels":[14]},{"layer":"J3","channels":[171]},{"layer":"L1","channels":[56]}]
@@ -201,9 +203,6 @@ stones=[{"layer":"G2","channels":[54]},{"layer":"H6","channels":[72]}]
 thread=[{"layer":"B1","channels":[31]},{"layer":"B6","channels":[6]},{"layer":"C1","channels":[33]},{"layer":"C2","channels":[0,44]},{"layer":"D1","channels":[67]},{"layer":"D2","channels":[55]},{"layer":"D3","channels":[174,185,201]},{"layer":"E1","channels":[115,125]},{"layer":"E2","channels":[52]},{"layer":"E6","channels":[38]},{"layer":"F3","channels":[254]},{"layer":"G3","channels":[248]},{"layer":"H1","channels":[66]},{"layer":"H6","channels":[77,101,123]},{"layer":"J2","channels":[32]},{"layer":"L1","channels":[48,119,125,126]}]
 
 wheel=[{"layer":"G6","channels":[20]},{"layer":"H5","channels":[20,89]}]
-
-
-
 
 
 
@@ -251,8 +250,6 @@ fave_moving2 = [
     {"layer":'G3', "channels":[283]}
 ]
 
-
-
 fave_moving = [
     {"layer":'A1', "channels":[15,52,7,8]},
     {"layer":'A2', "channels":[14,29]},
@@ -294,4 +291,44 @@ fave_moving = [
     {"layer":'J2', "channels":[48]},
     {"layer":'J6', "channels":[65]}
 ]
+
+
+
+
+
+layer_aliases = {}
+layer_aliases['layers_c1']=layers_c1
+layer_aliases['layers_m3']=layers_m3
+layer_aliases['layers_m4']=layers_m4
+layer_aliases['layers_m5']=layers_m5
+layer_aliases['layers_h1']=layers_h1
+layer_aliases['faves_c1']=faves_c1
+layer_aliases['faves_m3']=faves_m3
+layer_aliases['faves_m4']=faves_m4
+layer_aliases['faves_m5']=faves_m5
+layer_aliases['faves_h1']=faves_h1
+layer_aliases['birds']=birds
+layer_aliases['bowl']=bowl
+layer_aliases['brass']=brass
+layer_aliases['corner']=corner
+layer_aliases['dof']=dof
+layer_aliases['dogs']=dogs
+layer_aliases['eyes']=eyes
+layer_aliases['facade']=facade
+layer_aliases['flower']=flower
+layer_aliases['food']=food
+layer_aliases['nature']=nature
+layer_aliases['pattern']=pattern
+layer_aliases['pipe']=pipe
+layer_aliases['sea']=sea
+layer_aliases['simple']=simple
+layer_aliases['stones']=stones
+layer_aliases['thread']=thread
+layer_aliases['wheel']=wheel
+layer_aliases['fave_moving2']=fave_moving2
+layer_aliases['fave_moving1']=fave_moving1
+layer_aliases['fave_moving']=fave_moving
+
+def get_bookmarks_via_alias(layer_alias):
+    return layer_aliases[layer_alias]
 

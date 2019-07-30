@@ -25,28 +25,31 @@ from canvas import *
 #!unzip ../data/inception5h.zip -d ../data/inception5h/
 #!rm ../data/inception5h.zip
 
-#Create a session and load the Inception graph, then print the available layers.
-model_fn = 'inception5h/tensorflow_inception_graph.pb'
-
 graph = tf.Graph()
 sess = tf.InteractiveSession(graph=graph)
-with tf.gfile.FastGFile(model_fn, 'rb') as f:
-    graph_def = tf.GraphDef()
-    graph_def.ParseFromString(f.read())
 
-t_input = tf.placeholder(np.float32, name='input') # define the input tensor
-imagenet_mean = 117.0
-t_preprocessed = tf.expand_dims(t_input-imagenet_mean, 0)
-tf.import_graph_def(graph_def, {'input':t_preprocessed})
+def setup(model_fn):
+    global sess, graph, t_input
+    
+    with tf.gfile.FastGFile(model_fn, 'rb') as f:
+        graph_def = tf.GraphDef()
+        graph_def.ParseFromString(f.read())
 
-layers = [op.name for op in graph.get_operations() if op.type=='Conv2D' and 'import/' in op.name]
-feature_nums = [int(graph.get_tensor_by_name(name+':0').get_shape()[-1]) for name in layers]
+    t_input = tf.placeholder(np.float32, name='input') # define the input tensor
+    imagenet_mean = 117.0
+    t_preprocessed = tf.expand_dims(t_input-imagenet_mean, 0)
+    tf.import_graph_def(graph_def, {'input':t_preprocessed})
 
-print('Number of layers', len(layers))
-print('Total number of feature channels:', sum(feature_nums))
+    layers = [op.name for op in graph.get_operations() if op.type=='Conv2D' and 'import/' in op.name]
+    feature_nums = [int(graph.get_tensor_by_name(name+':0').get_shape()[-1]) for name in layers]
+
+    print('Number of layers', len(layers))
+    print('Total number of feature channels:', sum(feature_nums))
 
 
-
+def get_random_favorites(layer_alias, n):
+    return bookmark.get_random_favorites(bookmarks.get_alias(layer_alias), n)
+    
 def showarray(a, fmt='jpeg'):
     a = np.uint8(np.clip(a, 0, 1)*255)
     f = BytesIO()
@@ -79,13 +82,14 @@ def tffunc(*argtypes):
     def wrap(f):
         out = f(*placeholders)
         def wrapper(*args, **kw):
-            return out.eval(dict(zip(placeholders, args)), session=kw.get('session'))
+            return out.eval(dict(zip(placeholders, args)), session=sess)
         return wrapper
     return wrap
 
 def resize(img, size):
     img = tf.expand_dims(img, 0)
     return tf.image.resize_bilinear(img, size)[0,:,:,:]
+
 
 resize = tffunc(np.float32, np.int32)(resize)
 
@@ -168,7 +172,7 @@ def lap_normalize(img, scale_n=4):
     out = lap_merge(tlevels)
     return out[0,:,:,:]
 
-def generate_swatches(path="swatches"):
+def generate_swatches(layers, path="swatches"):
     '''Make swatches for all classes.'''
     oct_n = 4
     oct_s = 1.4
