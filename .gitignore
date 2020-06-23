@@ -6,6 +6,7 @@ out*.png
 *.pyc
 *.pth
 .DS_Store
+.ipynb_checkpoints/
 models/
 !models/download_models.py
 __pycache__/
