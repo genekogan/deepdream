@@ -1,0 +1,11 @@
+*.swp
+out*.png
+*.png
+*.jpg
+*.mp4
+*.pyc
+*.pth
+.DS_Store
+models/
+!models/download_models.py
+__pycache__/
