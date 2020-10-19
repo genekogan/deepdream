@@ -6,8 +6,13 @@ import tensorflow as tf
 
 #from utils import *
 
-from neuralarttools.image import *
-from neuralarttools.util import *
+
+#from neuralarttools.image import *
+#from neuralarttools.util import *
+
+from image import *
+
+
 
 
 # X finish basic example notebook
