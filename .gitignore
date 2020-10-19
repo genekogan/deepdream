@@ -8,5 +8,6 @@ out*.png
 .DS_Store
 .ipynb_checkpoints/
 models/
+model/
 !models/download_models.py
 __pycache__/
