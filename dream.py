@@ -1,35 +1,5 @@
 from tqdm import tqdm
 import numpy as np
-import tensorflow as tf
-#from PIL import Image
-
-
-#from utils import *
-
-
-#from neuralarttools.image import *
-#from neuralarttools.util import *
-
-from image import *
-
-
-
-
-# X finish basic example notebook
-# X lap_norm vs non_lap_norm mode, and others?
-# X converge on utils between neural-style and neural-synth
-#   X load_image, random_image, display, easy_dict, save 
-# X interpolate canvas instead of quantize (done)
-# X allow for gradients to be forced black & white
-# X make_image and make_video should use same (done)
-# X mask_image should take actual image instead of path, like other interchangeables (done)
-
-# X integrate mask + canvas
-# compute one massive gradient, and *then* add?
-# eden
-#  - whole pipeline with sequences, style and synth are interchangeable
-
-
 
 
 _deepdream_config_keys_ = [
@@ -38,7 +8,6 @@ _deepdream_config_keys_ = [
     'lap_n', 'step', 'normalize_gradients', 
     'grayscale_gradients'
 ]
-
 
 
 def run_deepdream(deepdream, config, img=None):
@@ -180,8 +149,7 @@ def run_deepdream(deepdream, config, img=None):
         
             # update console
             idx_iter += 1
-            update_str = 'Octave %d/%d, Iter %d/%d'%(
-                octave+1, cfg.num_octaves, idx_iter, total_iter)
+            update_str = 'Octave %d/%d, Iter %d/%d'%(octave+1, cfg.num_octaves, idx_iter, total_iter)
             progress.update(update_str)
         
     # clip final image
