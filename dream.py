@@ -1,8 +1,10 @@
 from tqdm import tqdm
 import numpy as np
+import tensorflow as tf
+from util import *
 
 
-_deepdream_config_keys_ = [
+__deepdream_config_keys__ = [
     'size', 'objective', 'num_octaves', 
     'octave_ratio', 'num_iterations', 'masks',
     'lap_n', 'step', 'normalize_gradients', 
@@ -30,7 +32,7 @@ def run_deepdream(deepdream, config, img=None):
     cfg.normalize_gradients = cfg.normalize_gradients if 'normalize_gradients' in cfg else False
     cfg.grayscale_gradients = cfg.grayscale_gradients if 'grayscale_gradients' in cfg else False
     
-    extraneous_keys = [k for k in cfg.keys() if k not in _deepdream_config_keys_]
+    extraneous_keys = [k for k in cfg.keys() if k not in __deepdream_config_keys__]
     assert len(extraneous_keys) == 0, \
         'Following config keys are not recognized: %s' % ', '.join(extraneous_keys)
     assert cfg.num_octaves == len(cfg.num_iterations), \
