@@ -12,7 +12,7 @@ __deepdream_config_keys__ = [
 ]
 
 
-def run_deepdream(deepdream, config, img=None):
+def run_deepdream(deepdream, config, img=None, title=None):
     cfg = EasyDict(config)
     
     cfg.objective = cfg.objective if isinstance(cfg.objective, list) else [cfg.objective]
@@ -151,7 +151,8 @@ def run_deepdream(deepdream, config, img=None):
         
             # update console
             idx_iter += 1
-            update_str = 'Octave %d/%d, Iter %d/%d'%(octave+1, cfg.num_octaves, idx_iter, total_iter)
+            title = '%s: '%title if title is not None else ''
+            update_str = '%sOctave %d/%d, Iter %d/%d' % (title, octave+1, cfg.num_octaves, idx_iter, total_iter)
             progress.update(update_str)
         
     # clip final image
