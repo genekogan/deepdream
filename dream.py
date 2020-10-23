@@ -92,6 +92,7 @@ def run_deepdream(deepdream, config, img=None, title=None):
     # setup progress bar
     idx_iter, total_iter = 0, sum(cfg.num_iterations)
     progress = ProgressBar(total_iter, num_increments=32)
+    title = '%s: '%title if title is not None else ''
     
     # for each octave
     for octave in range(cfg.num_octaves):
@@ -151,7 +152,6 @@ def run_deepdream(deepdream, config, img=None, title=None):
         
             # update console
             idx_iter += 1
-            title = '%s: '%title if title is not None else ''
             update_str = '%sOctave %d/%d, Iter %d/%d' % (title, octave+1, cfg.num_octaves, idx_iter, total_iter)
             progress.update(update_str)
         
