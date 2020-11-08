@@ -18,7 +18,9 @@ def get_random_favorites(favorite_layers, n):
         indexes = [int(len(favorites) * random()) for i in range(n)]
         list_good = (len(indexes) == len(set(indexes)))  # make sure unique
     channels = [favorites[idx] for idx in indexes]
-    channels = [{'layer': layer_lookup[c['layer']], 'channel': c['channel']} for c in channels]
+    channels = [{'layer': layer_lookup[c['layer']], 
+                 'channel': c['channel']} 
+                for c in channels]
     return channels
 
 

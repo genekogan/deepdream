@@ -1,7 +1,7 @@
 from tqdm import tqdm
 import numpy as np
 import tensorflow as tf
-from util import *
+from utils import *
 
 
 __deepdream_config_keys__ = [
