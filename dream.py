@@ -16,7 +16,7 @@ def run_deepdream(deepdream, config, img=None, title=None):
     cfg = EasyDict(config)
     
     cfg.objective = cfg.objective if isinstance(cfg.objective, list) else [cfg.objective]
-    cfg.size = cfg.size if 'size' in cfg else 512
+    cfg.size = cfg.size if 'size' in cfg else None
     cfg.masks = cfg.masks if 'masks' in cfg else None 
     cfg.num_octaves = cfg.num_octaves if 'num_octaves' in cfg else 1
     cfg.octave_ratio = cfg.octave_ratio if 'octave_ratio' in cfg else 1.0
@@ -44,18 +44,22 @@ def run_deepdream(deepdream, config, img=None, title=None):
         
     # load input image
     if img is None:
+        cfg.size = cfg.size if cfg.size is None else 512
         if not isinstance(cfg.size, tuple):
             cfg.size = (cfg.size, cfg.size)
         img = np.random.uniform(size=(cfg.size[1], cfg.size[0], 3)) + 100.0
     else:
-        if not isinstance(cfg.size, tuple):
+        if cfg.size is None:
+            cfg.size = get_size(img)
+        elif not isinstance(cfg.size, tuple):
             cfg.size = (int(get_aspect_ratio(img) * cfg.size), cfg.size)
+        
         if isinstance(img, str):
             img = load_image(img, cfg.size)
         else:
             img = resize(img.copy(), cfg.size)
     img = np.array(img).astype(np.float32)
-    
+        
     # load masks
     if cfg.masks is not None:    
         if isinstance(cfg.masks, np.ndarray):
