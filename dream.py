@@ -16,7 +16,6 @@ def run_deepdream(deepdream, config, img=None, title=None):
     cfg = EasyDict(config)
     
     cfg.objective = cfg.objective if isinstance(cfg.objective, list) else [cfg.objective]
-    cfg.size = cfg.size if 'size' in cfg else None
     cfg.masks = cfg.masks if 'masks' in cfg else None 
     cfg.num_octaves = cfg.num_octaves if 'num_octaves' in cfg else 1
     cfg.octave_ratio = cfg.octave_ratio if 'octave_ratio' in cfg else 1.0
@@ -34,7 +33,7 @@ def run_deepdream(deepdream, config, img=None, title=None):
     
     extraneous_keys = [k for k in cfg.keys() if k not in __deepdream_config_keys__]
     assert len(extraneous_keys) == 0, \
-        'Following config keys are not recognized: %s' % ', '.join(extraneous_keys)
+        'Following config keys are not recognized: {}'.format(', '.join(extraneous_keys))
     assert cfg.num_octaves == len(cfg.num_iterations), \
         'Error: must have cfg.num_octaves elements in cfg.num_iterations list'
     assert cfg.num_octaves == len(cfg.step), \
@@ -43,23 +42,21 @@ def run_deepdream(deepdream, config, img=None, title=None):
         'Error: must have cfg.num_octaves elements in cfg.lap_n list'
         
     # load input image
-    if img is None:
-        cfg.size = cfg.size if cfg.size is None else 512
+    if img is None:        
+        cfg.size = cfg.size if 'size' in cfg else (512, 512)
         if not isinstance(cfg.size, tuple):
             cfg.size = (cfg.size, cfg.size)
         img = np.random.uniform(size=(cfg.size[1], cfg.size[0], 3)) + 100.0
     else:
-        if cfg.size is None:
-            cfg.size = get_size(img)
-        elif not isinstance(cfg.size, tuple):
+        cfg.size = cfg.size if 'size' in cfg else get_size(img)
+        if not isinstance(cfg.size, tuple):
             cfg.size = (int(get_aspect_ratio(img) * cfg.size), cfg.size)
-        
         if isinstance(img, str):
             img = load_image(img, cfg.size)
         else:
             img = resize(img.copy(), cfg.size)
     img = np.array(img).astype(np.float32)
-        
+    
     # load masks
     if cfg.masks is not None:    
         if isinstance(cfg.masks, np.ndarray):
@@ -96,7 +93,7 @@ def run_deepdream(deepdream, config, img=None, title=None):
     # setup progress bar
     idx_iter, total_iter = 0, sum(cfg.num_iterations)
     progress = ProgressBar(total_iter, num_increments=32)
-    title = '%s: '%title if title is not None else ''
+    title = '{}: '.format(title) if title is not None else ''
     
     # for each octave
     for octave in range(cfg.num_octaves):
@@ -156,7 +153,7 @@ def run_deepdream(deepdream, config, img=None, title=None):
         
             # update console
             idx_iter += 1
-            update_str = '%sOctave %d/%d, Iter %d/%d' % (title, octave+1, cfg.num_octaves, idx_iter, total_iter)
+            update_str = '{}Octave {}/{}, Iter {}/{}'.format(title, octave+1, cfg.num_octaves, idx_iter, total_iter)
             progress.update(update_str)
         
     # clip final image
