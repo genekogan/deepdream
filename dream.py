@@ -4,7 +4,7 @@ import tensorflow as tf
 from utils import *
 
 
-__deepdream_config_keys__ = [
+__deepdream_config_keys__ = [ 'type',
     'size', 'objective', 'num_octaves', 
     'octave_ratio', 'num_iterations', 'masks',
     'lap_n', 'step', 'normalize_gradients', 
